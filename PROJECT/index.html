@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Add Habits — Roll 2420030652</title>
+  <style>
+    body { font-family: system-ui; background:#0f172a; padding:20px; color:#FFD700; }
+    .card { background:#1e293b; padding:20px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.4); max-width:480px; margin:0 auto; }
+    h2 { margin-top:0; color:#FFD700; }
+    form { display:flex; flex-direction:column; gap:12px; }
+    input, select { padding:10px; border-radius:6px; border:1px solid #334155; background:#0f172a; color:#FFD700; }
+    input::placeholder { color:#ffe066; }
+    button { padding:10px; border-radius:6px; border:none; cursor:pointer; font-weight:bold; }
+    .add-btn { background:#FFD700; color:#0f172a; }
+    .nav-btn { margin-top:12px; background:#2563eb; color:white; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Add New Habit</h2>
+    <form id="add-habit-form">
+      <input id="habit-input" type="text" placeholder="Habit name" required />
+      <input id="habit-date" type="date" required />
+      <input id="habit-time" type="time" />
+      <input id="habit-duration" type="number" placeholder="Duration (minutes)" min="1" />
+      <select id="habit-repeat">
+        <option value="once">Once</option>
+        <option value="daily">Daily</option>
+      </select>
+      <button class="add-btn" type="submit">Add Habit</button>
+    </form>
+    <button class="nav-btn" onclick="window.location.href='habits.html'">See Habits</button>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'daily-habit-tracker.habits.v1';
+    const form = document.getElementById('add-habit-form');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('habit-input').value.trim();
+      const date = document.getElementById('habit-date').value;
+      const time = document.getElementById('habit-time').value;
+      const duration = document.getElementById('habit-duration').value;
+      const repeat = document.getElementById('habit-repeat').value;
+
+      if (!name) return;
+
+      const habits = loadHabits();
+      const newHabit = {
+        id: 'h_' + Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-4),
+        name, targetDate: date, targetTime: time, duration, repeat,
+        createdAt: new Date().toISOString()
+      };
+      habits.push(newHabit);
+      saveHabits(habits);
+      alert("Habit added!");
+      form.reset();
+    });
+
+    function loadHabits() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; }
+    }
+    function saveHabits(list) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    }
+  </script>
+</body>
+</html>

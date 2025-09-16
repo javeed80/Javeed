@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>My Habits — Roll 2420030652</title>
+  <style>
+    body { font-family: system-ui; background:#0f172a; padding:20px; color:#FFD700; }
+    .card { background:#1e293b; padding:20px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.4); max-width:600px; margin:0 auto; }
+    h2 { margin-top:0; color:#FFD700; }
+    ul { list-style:none; padding:0; margin:0; }
+    li { background:#334155; padding:12px; border-radius:8px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; }
+    .habit-info { font-size:14px; color:#fefce8; }
+    .habit-name { font-weight:600; color:#FFD700; }
+    .btns { display:flex; gap:6px; }
+    button { padding:6px 10px; border-radius:6px; border:none; cursor:pointer; font-size:13px; font-weight:bold; }
+    .edit-btn { background:#f59e0b; color:white; }
+    .delete-btn { background:#ef4444; color:white; }
+    .back-btn { margin-top:16px; background:#FFD700; color:#0f172a; padding:10px; width:100%; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>My Habits</h2>
+    <ul id="habit-list"></ul>
+    <button class="back-btn" onclick="window.location.href='index.html'">⬅ Back to Add Habit</button>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'daily-habit-tracker.habits.v1';
+    const habitList = document.getElementById('habit-list');
+
+    render();
+
+    function render() {
+      habitList.innerHTML = '';
+      const habits = loadHabits();
+      if (habits.length === 0) {
+        habitList.innerHTML = '<li>No habits found.</li>';
+        return;
+      }
+      habits.forEach((h, idx) => {
+        const li = document.createElement('li');
+        const info = document.createElement('div');
+        info.className = "habit-info";
+        info.innerHTML = `
+          <div class="habit-name">${h.name}</div>
+          <div>Date: ${h.targetDate || "-"}, Time: ${h.targetTime || "-"}, Duration: ${h.duration || "-"} min, Repeat: ${h.repeat}</div>
+        `;
+        li.appendChild(info);
+
+        const btns = document.createElement('div');
+        btns.className = "btns";
+
+        const edit = document.createElement('button');
+        edit.className = "edit-btn";
+        edit.textContent = "Edit";
+        edit.onclick = () => editHabit(idx);
+
+        const del = document.createElement('button');
+        del.className = "delete-btn";
+        del.textContent = "Delete";
+        del.onclick = () => { deleteHabit(idx); };
+
+        btns.appendChild(edit);
+        btns.appendChild(del);
+        li.appendChild(btns);
+
+        habitList.appendChild(li);
+      });
+    }
+
+    function editHabit(index) {
+      const habits = loadHabits();
+      const h = habits[index];
+      const newDate = prompt("Enter new date (YYYY-MM-DD):", h.targetDate);
+      const newTime = prompt("Enter new time (HH:MM):", h.targetTime);
+      const newDur = prompt("Enter new duration (minutes):", h.duration);
+      const newRepeat = prompt("Enter repeat type (once/daily):", h.repeat);
+
+      habits[index].targetDate = newDate || h.targetDate;
+      habits[index].targetTime = newTime || h.targetTime;
+      habits[index].duration = newDur || h.duration;
+      habits[index].repeat = (newRepeat === "once" || newRepeat === "daily") ? newRepeat : h.repeat;
+
+      saveHabits(habits);
+      render();
+    }
+
+    function deleteHabit(index) {
+      if (!confirm("Delete this habit?")) return;
+      const habits = loadHabits();
+      habits.splice(index, 1);
+      saveHabits(habits);
+      render();
+    }
+
+    function loadHabits() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; }
+    }
+    function saveHabits(list) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    }
+  </script>
+</body>
+</html>

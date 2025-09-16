@@ -1,0 +1,5 @@
+write a html file with the following fields
+full name
+email
+password
+phone number
